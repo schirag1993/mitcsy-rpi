@@ -20,21 +20,26 @@ def handleAudio():
     elif(result[0]):
         textCommand = result[1]
         luisResponse = getIntentAndEntities(textCommand)
+        print("Performing RegEx")
         if(re.search(medPattern, luisResponse['intent'])):
+            print("Checking med patterns")
             if(luisResponse['intent'] == 'medical.findDisease'):
-                medicalQuery(luisResponse)
+                tts(medicalQuery(luisResponse))
             elif(luisResponse['intent'] == 'medical.getDescription'):
-                medicalQuery(luisResponse)
+                tts(medicalQuery(luisResponse))
             elif(luisResponse['intent'] == 'medical.getSymptoms'):
-                medicalQuery(luisResponse)
+                tts(medicalQuery(luisResponse))
             elif(luisResponse['intent'] == 'medical.identifyPatient'):
                 faceHandler(luisResponse)
             elif(luisResponse['intent'] == 'medical.registerPatient'):
                 faceHandler(luisResponse)
         elif(luisResponse['intent'] == 'None'):
+            print("None recognized")
             tts(noneHandler)
         elif(luisResponse['intent'] == 'Camera.CapturePhoto'):
+            print("Tweeting now")
             tweet()
+            print("Tweeted!")
     else:
         tts(result[1])
     return

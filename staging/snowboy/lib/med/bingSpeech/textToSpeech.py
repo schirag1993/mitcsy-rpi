@@ -127,6 +127,7 @@ def createAudioResponse(audioData):
 
 
 def playAudioResponse():
+    print("Playing audio file")
     pygame.mixer.init(frequency=16000, channels=1, size=-16)
     pygame.mixer.music.load('response.wav')
     pygame.mixer.music.play()
@@ -134,7 +135,7 @@ def playAudioResponse():
         continue
     pygame.mixer.quit()
     pygame.quit()
-
+    print("audio file play completed")
 
 # In[13]:
 

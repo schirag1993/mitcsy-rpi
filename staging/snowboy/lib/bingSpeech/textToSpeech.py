@@ -140,6 +140,7 @@ def playAudioResponse():
 
 
 def tts(text):
+    print("Inside TTS. COnverting the following text: ")
     print(text)
     rawAudio = sendToBing(text)
     if(rawAudio == False):
