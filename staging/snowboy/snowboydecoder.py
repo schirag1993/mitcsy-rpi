@@ -17,7 +17,6 @@ RESOURCE_FILE = os.path.join(TOP_DIR, "resources/common.res")
 DETECT_DING = os.path.join(TOP_DIR, "resources/ding.wav")
 DETECT_DONG = os.path.join(TOP_DIR, "resources/dong.wav")
 
-
 class RingBuffer(object):
     """Ring buffer to hold audio from PortAudio"""
 
@@ -33,7 +32,6 @@ class RingBuffer(object):
         tmp = bytes(bytearray(self._buf))
         self._buf.clear()
         return tmp
-
 
 def play_audio_file(fname=DETECT_DING):
     """Simple callback function to play a wave file. By default it plays
@@ -55,7 +53,6 @@ def play_audio_file(fname=DETECT_DING):
     stream_out.stop_stream()
     stream_out.close()
     audio.terminate()
-
 
 class HotwordDetector(object):
     """

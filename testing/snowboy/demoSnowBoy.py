@@ -1,35 +1,20 @@
-
-# coding: utf-8
-
-# In[13]:
-
-
 import snowboydecoder, sys, signal
 from pathlib import Path
-
-
-# In[14]:
-
+from audioRecorder import record_to_file
 
 interrupted = False
 modelPath = Path('./resources/hey_mitsy.pmdl')
 model = str(modelPath)
 
-
-# In[1]:
-
-
 def recordAudio():
-    print("Listening...")
-
-
-# In[ ]:
-
+    print("Recording audio now...")
+    record_to_file('query.wav')
+    handleAudio()
+    print("Done!")
 
 def signal_handler(signal, frame):
     global interrupted
     interrupted = True
-
 
 def interrupt_callback():
     global interrupted
@@ -47,4 +32,3 @@ detector.start(detected_callback=recordAudio,
                sleep_time=0.03)
 
 detector.terminate()
-
