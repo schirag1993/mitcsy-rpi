@@ -68,12 +68,24 @@ def handleSTTResponse(req):
     elif(result['RecognitionStatus'] == 'Error'):
         return(False, "Oops! Looks like something went wrong on the server side.")
 
-
-# In[25]:
-
-
 def stt():
     with open('./query.wav', 'rb') as audioFile:
+        body = audioFile.read()
+        url = getSTTEndpoint('dictation', 'en-US')
+        headers = createHeaders()
+        req = requests.post(url=url, headers=headers, data=body)
+    if(req.status_code != 200):
+        print("Something went wrong.")
+        print("Error Code: " + str(req.status_code))
+        print("Reason: " + str(req.reason))
+        return(False)
+    else:
+        print("Response Success")
+        result = handleSTTResponse(req)
+        return(result)
+    
+def DiagnoseSTT():
+    with open('./symptom.wav', 'rb') as audioFile:
         body = audioFile.read()
         url = getSTTEndpoint('dictation', 'en-US')
         headers = createHeaders()

@@ -1,0 +1,26 @@
+139:    print ('unit test')
+156:    print ("Saving file to disk please wait....")
+161:    print ("Extracting zipfile")
+220:#By default, error messages ARE print to stderr.
+224:    #print "Hey!",excValue
+253:        print "The logging level given is not valid"
+258:    This function prints the current logging level of the main logger.
+268:    print "The current logging level is:", levels_dict[logger.getEffectiveLevel()]
+305:        print "Now logging to",myfilename,"with level",log_level
+307:        print "Now logging with level",log_level
+328:        print "System : ", platform.system()
+329:        print "OS version : ", platform.version()
+330:        print "Python version :", platform.python_version()
+333:            print "Open CV version : " + __version__
+335:            print "Open CV2 version : " + "2.1"
+337:            print "PIL version : ", pil.VERSION
+339:            print "PIL module not installed"
+341:            print "Orange Version : " + orange.version
+343:            print "Orange module not installed"
+346:            print "PyGame Version : " + pg.__version__
+348:            print "PyGame module not installed"
+351:            print "Pickle Version : " + pickle.__version__
+353:            print "Pickle module not installed"
+356:        print "You need to install Platform to use this function"
+357:        print "to install you can use:"
+358:        print "easy_install platform"

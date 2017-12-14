@@ -143,10 +143,15 @@ def playSelfieAudioResponse():
         continue
     pygame.mixer.quit()
     pygame.quit()
-
-
-# In[13]:
-
+    
+def tweetAck():
+    pygame.mixer.init(frequency=16000, channels=1, size=-16)
+    pygame.mixer.music.load('tweetAck.wav')
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy() == True:
+        continue
+    pygame.mixer.quit()
+    pygame.quit()
 
 def tts(text):
     print(text)

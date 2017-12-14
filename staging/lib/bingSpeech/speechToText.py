@@ -84,7 +84,8 @@ def stt():
         print("Reason: " + str(req.reason))
         return(False)
     else:
-        print("Response Success")
+        print("STT Success: ")
+        print(result['DisplayText'])
         result = handleSTTResponse(req)
         return(result)
 

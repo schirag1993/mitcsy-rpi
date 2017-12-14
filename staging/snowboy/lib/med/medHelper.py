@@ -1,62 +1,30 @@
-
-# coding: utf-8
-
-# ## Libraries:
-
-# In[298]:
-
-
 from pymongo import MongoClient
-import json, os
+import json, os, re
 # import pandas as pd
 from pprint import pprint
 from .bingSpeech.textToSpeech import tts
-
-
-# # Helper Functions
-
-# ### DB Helper Functions:
-
-# In[4]:
-
+from .bingSpeech.speechToText import stt, DiagnoseSTT
+from .audioRecorderAutoStop import record_to_file
 
 def getDBCreds():
     credentials = json.load(open('../credentials.json'))
     dbCreds = credentials['database']
     return dbCreds
 
-
-# In[6]:
-
-
 def connectToDB(dbCreds):
     cosmosConnString = "mongodb://" + dbCreds['username'] + ":" + dbCreds['password'] + "@" + dbCreds['host'] + ":" + str(dbCreds['port']) + "/?ssl=true&replicaSet=globaldb"
     client = MongoClient(cosmosConnString)
     return client
-
-
-# In[3]:
-
 
 def getClient():
     dbCreds = getDBCreds()
     client = connectToDB(dbCreds)
     return client
 
-
-# ### Disease Helper Funtions:
-
-# In[1]:
-
-
 def getLiterature(client):
     db = client["admin"]
     literatureCollection = db["literatures"]
     return literatureCollection
-
-
-# In[108]:
-
 
 def getSymptomList(client):
     db = client['admin']
@@ -66,10 +34,6 @@ def getSymptomList(client):
     for element in symptomListCursor:
         symptomList.append(element['name'])
     return symptomList
-
-
-# In[302]:
-
 
 def getDiseaseList(client, symptoms, nonTargetSymptoms, targetSymptomCount, nonTargetSymptomCount):
     literatureCollection = getLiterature(client)
@@ -84,44 +48,52 @@ def getDiseaseList(client, symptoms, nonTargetSymptoms, targetSymptomCount, nonT
         diseases.append(disease['title'])
     return({"diseases":diseases,"count":count})
 
+def diagnoseDisease(client):
+    print("Getting symptom list")
+    symptomList = getSymptomList(client)
+    print("Got symptom list")
+    response = diagnoseDiseaseHelper(symptomList, client)
+    return(response)
 
-# ### The following code segment showcases how pandas can be used for better symptom analysis
-
-# In[1]:
-
-
-# symptomList = getSymptomList(client)
-# dfColumns = ["True"]
-
-# symptomDf = pd.DataFrame(index=testSymptomList, columns=dfColumns)
-
-# symptomDf = testDf.fillna(0)
-# targetSymptoms = []
-# for index,row in testDf.iterrows():
-#     if(row.iloc[0] == 1):
-#         print("Adding symptom to targetSymptom list")
-#         print(row.name)
-#         ***modify df here to generate a sparse matrix***
-#         validSymptoms.append(row.name)
-
-
-# ### **%%%End of Sample Code Block%%%**
-
-# In[5]:
-
-
-def diagnoseDisease(symptomList, client):
+def diagnoseDiseaseHelper(symptomList, client):
+    tts('We will now attempt to diagnose your disease')
+    question = "Do you have {0} ?"
     flag = False
     targetSymptoms = []
     nonTargetSymptoms = []
     symptomListLength = len(symptomList)
     count = 0
+    ans = "no"
     while(flag !=True):
         for symptom in symptomList:
-            ans = input("Do you have " + symptom + "? \n")
+            tts(question.format(symptom))
+            print("Calling record function")
+            record_to_file("symptom.wav")
+            print("Returned from record function")
+            sttRes = DiagnoseSTT()
+            if(type(sttRes) != tuple):
+                print("Something went wrong!");
+                tts("Something went wrong, try again later")
+                return
+            elif(sttRes[0] != True):
+                print("STT returned the following: {0}".format(sttRes[1]))
+                tts(sttRes[1])
+            else:
+                questionResponse = sttRes[1]
+                questionResponse = questionResponse.split()
+                print("questionResponse is: ")
+                pprint(questionResponse)
+                if('yes' in questionResponse or 'yeah' in questionResponse or 'definitely' in questionResponse or 'Yes' in questionResponse or 'Yes.' in questionResponse or 'Yeah.' in questionResponse):
+                    print("Found a yes!")
+                    ans = "yes"
+                else:
+                    print("Found a no!")
+                    ans = "no"
+            print("Processing")
             if(ans == 'yes'):
                 targetSymptoms.append(symptom)
-                queryResult = getDiseaseList(targetSymptoms, nonTargetSymptoms, len(targetSymptoms), len(nonTargetSymptoms))
+#                 client, symptoms, nonTargetSymptoms, targetSymptomCount, nonTargetSymptomCount
+                queryResult = getDiseaseList(client=client, symptoms=targetSymptoms, nonTargetSymptoms=nonTargetSymptoms, targetSymptomCount=len(targetSymptoms), nonTargetSymptomCount=len(nonTargetSymptoms))
                 if(queryResult['count']==1):
                     flag = True
                     response = "The diagnosed disease is " + queryResult['diseases'][0]
@@ -132,15 +104,12 @@ def diagnoseDisease(symptomList, client):
                     return(response)
             else:
                 nonTargetSymptoms.append(symptom)
-                queryResult = getDiseaseList(targetSymptoms, nonTargetSymptoms, len(targetSymptoms), len(nonTargetSymptoms))
+                lenNonTargetSymptoms = len(nonTargetSymptoms)
+                queryResult = getDiseaseList(client=client, symptoms=targetSymptoms, nonTargetSymptoms=nonTargetSymptoms, targetSymptomCount=len(targetSymptoms), nonTargetSymptomCount=len(nonTargetSymptoms))
                 if(queryResult['count']==0):
                     flag = True
                     response = "It seems the symptoms do not match anything from the database"
                     return(response)
-
-
-# In[4]:
-
 
 def findSymptoms(diseaseName, client):
     literatureCollection = getLiterature(client)
@@ -151,16 +120,11 @@ def findSymptoms(diseaseName, client):
     response = "The symptoms of " + diseaseName + " are " + symptoms + "."
     return response
 
-
-# In[2]:
-
-
 def findDescription(diseaseName, client):
     literatureCollection = getLiterature(client)
     result = literatureCollection.find_one(filter={"title" : diseaseName})
     diseaseDescription = result["content"]
     return diseaseDescription
-
 
 def medicalQuery(luisRes):
     intent = luisRes['intent']
@@ -169,7 +133,8 @@ def medicalQuery(luisRes):
     if(intent == 'medical.getDescription'):
         return(findDescription(entities[0]['diseaseName'], dbClient))
     elif(intent == 'medical.findDisease'):
-        return("Functionality unavailable")
+#         return("Functionality unavailable")
+          return(diagnoseDisease(dbClient))
     elif(intent == 'medical.getSymptoms'):
         return(findSymptoms(entities[0]['diseaseName'], dbClient))
         # //////////////^MODIFY MAIN CODE FOR THIS^\\\\\\\\\\\\\\\\

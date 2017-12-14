@@ -78,8 +78,6 @@ def createTTSHeaders(accessToken):
 def sendToBing(text):
     accessToken = getToken()
     print("access token obtained")
-    print("Access token type: ")
-    print(type(accessToken))
     body = createBody(text)
     headers = createTTSHeaders(accessToken)
     url = getTTSEndpoint()
@@ -140,7 +138,7 @@ def playAudioResponse():
 
 
 def tts(text):
-    print("Inside TTS. COnverting the following text: ")
+    print("Inside main TTS. Converting the following text: ")
     print(text)
     rawAudio = sendToBing(text)
     if(rawAudio == False):

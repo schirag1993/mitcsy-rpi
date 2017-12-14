@@ -78,8 +78,6 @@ def createTTSHeaders(accessToken):
 def sendToBing(text):
     accessToken = getToken()
     print("access token obtained")
-    print("Access token type: ")
-    print(type(accessToken))
     body = createBody(text)
     headers = createTTSHeaders(accessToken)
     url = getTTSEndpoint()

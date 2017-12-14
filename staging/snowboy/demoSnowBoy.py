@@ -11,8 +11,9 @@ model = str(modelPath)
 def recordAudio():
     print("Recording audio now...")
     record_to_file('query.wav')
+    print("Recording complete!")
     handleAudio()
-    print("Done!")
+    print("Command handling done!")
 
 def signal_handler(signal, frame):
     global interrupted
