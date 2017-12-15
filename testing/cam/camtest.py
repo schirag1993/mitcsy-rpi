@@ -5,8 +5,8 @@ import pygame.camera
 from pprint import pprint
 from pygame.locals import *
 
-width = 1280
-height = 720
+width = 640
+height = 480
 
 # def takeSelfie():
 #     pygame.init()
@@ -45,3 +45,16 @@ height = 720
 #     cam.stop()
 #     return
 
+pygame.init()
+print("Initialized pygame")
+pygame.camera.init()
+cam = pygame.camera.Camera("/dev/video0",(width,height))
+cam.start()
+print("Camera started")
+image = cam.get_image()
+print("Photo captured!")
+pygame.image.save(image,'selfie.jpg')
+cam.stop()
+print("Unlocking resource...")
+pygame.quit()
+print("Done!")
