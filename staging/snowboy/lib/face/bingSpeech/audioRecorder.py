@@ -101,7 +101,7 @@ def record():
     return sample_width, r
 
 def record_to_file(path):
-    print("Recording to query.wav")
+    print("Recording to {0}".format(path))
     "Records from the microphone and outputs the resulting data to 'path'"
     sample_width, data = record()
     data = pack('<' + ('h'*len(data)), *data)

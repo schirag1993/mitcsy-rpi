@@ -1,15 +1,5 @@
-
-# coding: utf-8
-
-# In[3]:
-
-
 import requests, json, wave
 from pprint import pprint
-
-
-# In[4]:
-
 
 def getBingCreds():
     '''
@@ -25,10 +15,6 @@ def getBingCreds():
 def getBingKey():
     return getBingCreds()['key']
 
-
-# In[5]:
-
-
 def getBingEndpoint():
     '''
     Returns the endpoint specified in the Azure resource page
@@ -37,10 +23,6 @@ def getBingEndpoint():
 
 def getSTTEndpoint(mode, lang):
     return("https://speech.platform.bing.com/speech/recognition/" + mode + "/cognitiveservices/v1?language=" + lang + "&format=simple")
-
-
-# In[6]:
-
 
 def createHeaders():
     bingCreds = getBingCreds()
@@ -51,12 +33,9 @@ def createHeaders():
     }
     return(headers)
 
-
-# In[27]:
-
-
 def handleSTTResponse(req):
     result = req.json()
+    pprint(result)
     if(result['RecognitionStatus'] == 'Success'):
         return(True, result['DisplayText'])
     elif(result['RecognitionStatus'] == 'NoMatch'):
@@ -67,10 +46,6 @@ def handleSTTResponse(req):
         return(False, "Quit your babbling. Too much noise here")
     elif(result['RecognitionStatus'] == 'Error'):
         return(False, "Oops! Looks like something went wrong on the server side.")
-
-
-# In[25]:
-
 
 def stt(fileName):
     with open('./{}'.format(fileName), 'rb') as audioFile:
@@ -87,4 +62,3 @@ def stt(fileName):
         print("Response Success")
         result = handleSTTResponse(req)
         return(result)
-

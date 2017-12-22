@@ -8,6 +8,38 @@ import sys
 from pprint import pprint
 from pygame.locals import *
 
+def captureTargetImage():
+    width = 1280
+    height = 720
+    dimensions = (width, height)
+    pygame.init()
+    print("Initializing PyGame")
+    pygame.camera.init()
+    flag = False
+    count = 0
+    while(flag == False):
+        try:
+            cam = pygame.camera.Camera("/dev/video0",dimensions)
+            cam.start()
+            print("Camera started")
+            imageName = 'target.jpg'
+            image = cam.get_image()
+            print("Target Image saved")
+            pygame.image.save(image,imageName)
+            cam.stop()
+            pygame.quit()
+            flag = True
+            return flag
+        except:
+            print("Camera busy. Stand by.")
+            time.sleep(1)
+            count = count + 1
+            if(count>9):
+                print("You might need to reconnect the camera. My apologies.")
+                pygame.quit()
+                flag = True
+                return flag
+            
 def captureSelfie():
     width = 1280
     height = 720
@@ -15,9 +47,9 @@ def captureSelfie():
     pygame.init()
     print("Initializing PyGame")
     pygame.camera.init()
-    flag = True
+    flag = False
     count = 0
-    while(flag):
+    while(flag == False):
         try:
             cam = pygame.camera.Camera("/dev/video0",dimensions)
             cam.start()
@@ -28,8 +60,8 @@ def captureSelfie():
             pygame.image.save(image,imageName)
             cam.stop()
             pygame.quit()
-            flag = False
-            return
+            flag = True
+            return flag
         except:
             print("Camera busy. Stand by.")
             time.sleep(1)
@@ -37,8 +69,8 @@ def captureSelfie():
             if(count>9):
                 print("You might need to reconnect the camera. My apologies.")
                 pygame.quit()
-                flag = False
-                return
+                flag = True
+                return flag
     
 def captureTrainingImages():
     width = 1280
@@ -47,9 +79,9 @@ def captureTrainingImages():
     pygame.init()
     print("Initializing PyGame")
     pygame.camera.init()
-    flag = True
+    flag = False
     count = 0
-    while(flag):
+    while(flag == False):
         try:
             cam = pygame.camera.Camera("/dev/video0",dimensions)
             cam.start()
@@ -63,7 +95,7 @@ def captureTrainingImages():
             cam.stop()
             pygame.quit()
             print("DONE!")
-            flag = False
+            flag = True
             return
         except:
             print("Camera busy. Stand by.")
@@ -72,7 +104,5 @@ def captureTrainingImages():
             if(count>9):
                 print("You might need to reconnect the camera. My apologies.")
                 pygame.quit()
-                flag = False
-                return
-            
-captureSelfie()
+                flag = True
+                return flag

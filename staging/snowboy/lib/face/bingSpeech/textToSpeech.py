@@ -1,6 +1,7 @@
 import requests, wave, json, base64, wave, pygame
 from xml.etree import ElementTree
 from pprint import pprint
+from .audioRecorder import record_to_file
 
 def getBingCreds():
     credentials = json.load(open('../credentials.json'))
@@ -81,10 +82,27 @@ def playAudioResponse():
     pygame.mixer.quit()
     pygame.quit()
     
+def playAudioFile(fileName):
+    pygame.mixer.init(frequency=16000, channels=1, size=-16)
+    pygame.mixer.music.load(fileName)
+    pygame.mixer.music.play()
+    while pygame.mixer.music.get_busy() == True:
+        continue
+    pygame.mixer.quit()
+    pygame.quit()
+    
 def askName():
-    tts("What is your name?")
-    record_to_file('name.wav')
+    playAudioFile('name.wav')
+    print("Playing name.wav")
+    record_to_file('patientName.wav')
     print("Obtained name")
+    return
+
+def askAge():
+    playAudioFile('age.wav')
+    record_to_file('patientAge.wav')
+    print("Obtained age")
+    return
 
 def tts(text):
     print(text)

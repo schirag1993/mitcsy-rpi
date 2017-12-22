@@ -1,14 +1,11 @@
-# coding: utf-8
-
 import requests, json, re
-# import cognitive_face as CF
 from pprint import pprint
 from pathlib import Path
 from pymongo import MongoClient
 from pymongo import ReturnDocument
-from .bingSpeech.speechToText import stt
-from .bingSpeech.textToSpeech import tts
-from .camera.cam import captureTrainingImages
+from bingSpeech.speechToText import stt
+from bingSpeech.textToSpeech import tts, askName, askAge
+from camera.cam import captureTrainingImages, captureTargetImage
 
 def getFaceAPICreds():
     credentials = json.load(open('../credentials.json'))
@@ -33,16 +30,6 @@ def checkCountValue(count):
         return(count)
     else:
         return(count)
-
-def renameImages(p):
-    count = 0
-    for file in p.glob('*.jpg'):
-        imageCount = checkCountValue(count)
-        newImageName = "image" + checkCountValue(count) + ".jpg"
-        print("Current file name is: ")
-        print(file)
-        file.rename(newImageName)
-        count = count + 1
         
 def createHeaders(subscription_key, contentType):
     headers = {
@@ -79,6 +66,8 @@ def getFaceId():
     body = open('./target.jpg', 'rb')
     response = requests.post(url=url,data=body,params=params,headers=headers)
     body.close()
+    if( len(response.json()) == 0 ):
+        return(False)
     faceID = getFaceDetails(response)['faceId']
     return(faceID)
 
@@ -177,7 +166,7 @@ def createPerson(personGroupId, name, userData):
         print("Success")
         pprint(req.json())
         dbEntryResult = savePersonId(personGroupId, name, req.json()['personId'])
-        if(result.acknowledged):
+        if(dbEntryResult.acknowledged):
             print("Stored in DB!")
     else:
         print("Error: " + str(req.status_code))
@@ -221,15 +210,21 @@ def addPersonFace(file, personGroupId, personId):
     headers = createHeaders(key, 'octet-stream')
     url = getPersonGroupURL(faceCreds)
     fullURL = url + '/' + personGroupId + '/persons/' + personId + '/persistedFaces'
-    body = file.read_bytes()
-    req = requests.post(url=fullURL, data=body, headers=headers)
-    print("Response: " + str(req.status_code) + "; Persisted Face ID: " + req.json()['persistedFaceId'])
-    if(req.status_code != 200):
-        print("Error: " + pprint(req.json()))
-    else:
-        print("Success")
-        pprint(req.json())
-    return(req)
+    with open(file, 'rb') as body:
+        print("File opened")
+        req = requests.post(url=fullURL, data=body, headers=headers)
+        pprint("Response Code: {}".format(req.status_code))
+        if(req.status_code != 200):
+            return(False)
+        print("Response: " + str(req.status_code) + "; Persisted Face ID: " + req.json()['persistedFaceId'])
+        if(req.status_code != 200):
+            print("Error: ")
+            pprint(req.json())
+            return(False)
+        else:
+            print("Success")
+            pprint(req.json())
+        return(req)
 # {'persistedFaceId': '00a07369-b34c-490b-ba2d-c5d9c2a073dd'}
 
 def storePersistedFaceId(persistedFaces, personId):
@@ -241,18 +236,30 @@ def storePersistedFaceId(persistedFaces, personId):
 
 def addFaces(personGroupId, personId):
     p = Path('.')
+    pattern = re.compile('training.*jpg')
     # res = addPersonFace(p, "hospital_department", "7234cf7b-2b27-43a7-8fd9-36e131e2fb41")
     persistedFaces = []
-    for file in p.glob("training*.jpg"):
-        res = addPersonFace(file=file, personGroupId=personGroupId, personId=personId)
-        persistedFaceId = res.json()['persistedFaceId']
-        persistedFaces.append(persistedFaceId)
+    for file in p.glob("*.jpg"):
+        if(re.search(pattern, str(file))):
+            print("File name: {}".format(str(file)))
+            print("Adding face to person ID")
+            res = addPersonFace(file=str(file), personGroupId=personGroupId, personId=personId)
+            if(res == False):
+                print("Unable to find face or API error")
+                continue
+            persistedFaceId = res.json()['persistedFaceId']
+            persistedFaces.append(persistedFaceId)
+        else:
+            print("Unable to find images")
+            return(False)
     pprint(storePersistedFaceId(persistedFaces, personId))
     pprint(persistedFaces)
     print("Faces have been stored")
 
 def registerPatient(personGroupId, name, userData):
+    print("We will now attempt to capture images to train")
     captureTrainingImages()
+    print("Capture complete")
     response = createPerson(personGroupId, name, userData)
     print("Response from createPerson is: ")
     pprint(response.json())
@@ -292,17 +299,6 @@ def registerPatient(personGroupId, name, userData):
             return(True)
     return(True)
 
-def captureImage():
-    # Take a single photo here and rename it as "target.jpg"
-    print("Capturing image")
-    flag = True
-    if(flag):
-        print("Image captured!")
-        return(True)
-    else:
-        print("Image capture failed")
-        return(False)
-
 def findPatient(personId):
     client = getClient()
     patientCollection = getPatients(client)
@@ -310,19 +306,29 @@ def findPatient(personId):
     return(dbResult)
 
 def findPatientRecords(response):
+    if(len(response[0]['candidates']) == 0):
+        print("No recognized candidates")
+        return(False)
     personId = response[0]['candidates'][0]['personId']
     result = findPatient(personId)
-    result = result['name']
-    return(result)
+    pprint(result)
+    if(result):
+        result = result['name']
+        return(result)
+    else:
+        print("Unable to find patient")
+        return(False)
 
 def identifyPatient(personGroupId):
-    if(captureImage()):
+    if(captureTargetImage()):
         print("Image prepping for analysis")
     else:
         print("Image capture failed")
         return(False)
     faceIds = []
     faceId = getFaceId()
+    if(faceId == False):
+        return("No faces detected!")
     faceIds.append(faceId)
     faceCreds = getFaceAPICreds()
     key = getFaceKey(faceCreds)
@@ -336,37 +342,53 @@ def identifyPatient(personGroupId):
     }
     req = requests.post(url=url, headers=headers, json=body)
     candidate = findPatientRecords(req.json())
+    if(candidate == False):
+        return("Face does not match any patients or Patient not registered")
     response = "Hello, " + candidate
     return(response)
 
 def getName():
-#     name = input("What is your name?")
     askName()
-    res = stt('name.wav')
-    if(type(res) == tuple):
-        if(res[0]):
-            print(res[1])
-            return(res[1])
-    else:
+    res = stt('patientName.wav')
+    if(type(res) != tuple or res[0] == False):
+        print("Something went wrong with getting the name")
         return(False)
-
+    else:
+        return(res[1])
+    
 def getAge():
-    age = input("What is your age")
-    return(age)
+    askAge()
+    res = stt('patientAge.wav')
+    if(type(res) != tuple or res[0] == False):
+        print("Something went wrong with getting the age")
+        return(False)
+    else:
+        return(res[1])
 
 def faceHandler(intentAndEntity):
+    print("Inside face handler")
     personGroupId = 'hospital_department'
     intent = intentAndEntity['intent']
     entities = intentAndEntity['entities']
     if(intent == 'medical.registerPatient'):
+        print("Inside registerPatient")
         #add registration process here
         name = getName()
         age = getAge()
+        if(name == False or age == False):
+            return("Something went wrong. Try again.")
         userData = "{0} is {1} years of age.".format(name, age)
+        print(userData)
         registerPatient(personGroupId=personGroupId, userData=userData, name=name)
     elif(intent=='medical.identifyPatient'):
         response = identifyPatient(personGroupId)
         print(response)
     else:
         print("I am unable to do that")
+        
+intentAndEntity = {
+    "intent" : 'medical.identifyPatient',
+    "entities" : []
+}
 
+faceHandler(intentAndEntity)
