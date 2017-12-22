@@ -129,12 +129,19 @@ def findDescription(diseaseName, client):
 def medicalQuery(luisRes):
     intent = luisRes['intent']
     entities = luisRes['entities']
+    print("Entities are: ")
+    pprint(entities)
     dbClient = getClient()
     if(intent == 'medical.getDescription'):
-        return(findDescription(entities[0]['diseaseName'], dbClient))
+        if(len(entities) == 0):
+            return("Could not identify disease in statement. Please try again.")
+        else:
+            return(findDescription(entities[0]['diseaseName'], dbClient))
     elif(intent == 'medical.findDisease'):
-#         return("Functionality unavailable")
-          return(diagnoseDisease(dbClient))
+        return(diagnoseDisease(dbClient))
     elif(intent == 'medical.getSymptoms'):
-        return(findSymptoms(entities[0]['diseaseName'], dbClient))
+        if(len(entities) == 0):
+            return("Unable to find the disease in statement. Please try again.")
+        else:
+            return(findSymptoms(entities[0]['diseaseName'], dbClient))
         # //////////////^MODIFY MAIN CODE FOR THIS^\\\\\\\\\\\\\\\\

@@ -4,7 +4,8 @@ from lib.ocr.ocr import getRecognizedText
 from lib.face.face import faceHandler
 from lib.bingSpeech.textToSpeech import tts
 from lib.bingSpeech.speechToText import stt
-from lib.twitter.twitter import tweet
+from lib.azureblob.azureblob import sendToAzure
+from pprint import pprint
 import re
 
 def handleAudio():
@@ -20,6 +21,9 @@ def handleAudio():
     elif(result[0]):
         textCommand = result[1]
         luisResponse = getIntentAndEntities(textCommand)
+        print("LUIS Intent: {0}".format(luisResponse['intent']))
+        print("LUIS Entities: ")
+        pprint(luisResponse['entities'])
         print("Performing RegEx")
         if(re.search(medPattern, luisResponse['intent'])):
             print("Checking med patterns")
@@ -37,9 +41,8 @@ def handleAudio():
             print("None recognized")
             tts(noneHandler)
         elif(luisResponse['intent'] == 'Camera.CapturePhoto'):
-            print("Tweeting now")
-            tweet()
-            print("Tweeted!")
+            sendToAzure()
     else:
         tts(result[1])
+    print("Returning to KWS mode")
     return
