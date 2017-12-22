@@ -3,9 +3,9 @@ from pprint import pprint
 from pathlib import Path
 from pymongo import MongoClient
 from pymongo import ReturnDocument
-from bingSpeech.speechToText import stt
-from bingSpeech.textToSpeech import tts, askName, askAge
-from camera.cam import captureTrainingImages, captureTargetImage
+from .bingSpeech.speechToText import stt
+from .bingSpeech.textToSpeech import tts, askName, askAge
+from .camera.cam import captureTrainingImages, captureTargetImage
 
 def getFaceAPICreds():
     credentials = json.load(open('../credentials.json'))
@@ -376,19 +376,17 @@ def faceHandler(intentAndEntity):
         name = getName()
         age = getAge()
         if(name == False or age == False):
+            print("Something went wrong. Try again.")
             return("Something went wrong. Try again.")
         userData = "{0} is {1} years of age.".format(name, age)
         print(userData)
-        registerPatient(personGroupId=personGroupId, userData=userData, name=name)
+        registrationStatus = registerPatient(personGroupId=personGroupId, userData=userData, name=name)
+        if(registrationStatus):
+            return("Successfully registered patient")
     elif(intent=='medical.identifyPatient'):
         response = identifyPatient(personGroupId)
         print(response)
+        return(response)
     else:
         print("I am unable to do that")
-        
-intentAndEntity = {
-    "intent" : 'medical.identifyPatient',
-    "entities" : []
-}
-
-faceHandler(intentAndEntity)
+        return("I am unable to do that")

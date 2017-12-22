@@ -34,7 +34,7 @@ def handleAudio():
             elif(luisResponse['intent'] == 'medical.getSymptoms'):
                 tts(medicalQuery(luisResponse))
             elif(luisResponse['intent'] == 'medical.identifyPatient'):
-                faceHandler(luisResponse)
+                tts(faceHandler(luisResponse))
             elif(luisResponse['intent'] == 'medical.registerPatient'):
                 faceHandler(luisResponse)
         elif(luisResponse['intent'] == 'None'):
