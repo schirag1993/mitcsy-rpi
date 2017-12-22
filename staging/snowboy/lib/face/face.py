@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import requests, json
+import requests, json, re
 # import cognitive_face as CF
 from pprint import pprint
 from pathlib import Path
@@ -8,20 +8,12 @@ from pymongo import MongoClient
 from pymongo import ReturnDocument
 from .bingSpeech.speechToText import stt
 from .bingSpeech.textToSpeech import tts
+from .camera.cam import captureTrainingImages
 
 def getFaceAPICreds():
     credentials = json.load(open('../credentials.json'))
     faceCreds = credentials['cognitiveServices']['faceDetection']
     return faceCreds
-
-def captureTrainingImages():
-    path = Path('trainingImages')
-    # Note: The captured images must be named face**.jpeg; 
-    # These files must be stored in "./trainingImages"
-    # Where ** represents numbers ranging from 00 to 10
-    # We need to get eleven images to train the model
-    pprint("Images captured!")
-    return(path)
 
 def getFaceDetectURL(faceCreds):
     return(faceCreds['endPoint'] + '/detect')
@@ -248,10 +240,10 @@ def storePersistedFaceId(persistedFaces, personId):
     return(returnedDoc)
 
 def addFaces(personGroupId, personId):
-    p = Path('trainingImages')
+    p = Path('.')
     # res = addPersonFace(p, "hospital_department", "7234cf7b-2b27-43a7-8fd9-36e131e2fb41")
     persistedFaces = []
-    for file in p.glob("*.jpg"):
+    for file in p.glob("training*.jpg"):
         res = addPersonFace(file=file, personGroupId=personGroupId, personId=personId)
         persistedFaceId = res.json()['persistedFaceId']
         persistedFaces.append(persistedFaceId)
@@ -259,13 +251,8 @@ def addFaces(personGroupId, personId):
     pprint(persistedFaces)
     print("Faces have been stored")
 
-def moveImages():
-    print("Add moving image file code here")
-
 def registerPatient(personGroupId, name, userData):
-    path = captureTrainingImages()
-#     renameImages(path)
-    moveImages()
+    captureTrainingImages()
     response = createPerson(personGroupId, name, userData)
     print("Response from createPerson is: ")
     pprint(response.json())

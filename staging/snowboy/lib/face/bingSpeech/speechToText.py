@@ -72,8 +72,8 @@ def handleSTTResponse(req):
 # In[25]:
 
 
-def stt(file):
-    with open('./{}'.format(file), 'rb') as audioFile:
+def stt(fileName):
+    with open('./{}'.format(fileName), 'rb') as audioFile:
         body = audioFile.read()
         url = getSTTEndpoint('dictation', 'en-US')
         headers = createHeaders()
