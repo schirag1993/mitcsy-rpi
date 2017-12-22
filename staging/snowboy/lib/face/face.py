@@ -6,6 +6,8 @@ from pprint import pprint
 from pathlib import Path
 from pymongo import MongoClient
 from pymongo import ReturnDocument
+from .bingSpeech.speechToText import stt
+from .bingSpeech.textToSpeech import tts
 
 def getFaceAPICreds():
     credentials = json.load(open('../credentials.json'))
@@ -351,8 +353,15 @@ def identifyPatient(personGroupId):
     return(response)
 
 def getName():
-    name = input("What is your name?")
-    return(name)
+#     name = input("What is your name?")
+    askName()
+    res = stt('name.wav')
+    if(type(res) == tuple):
+        if(res[0]):
+            print(res[1])
+            return(res[1])
+    else:
+        return(False)
 
 def getAge():
     age = input("What is your age")

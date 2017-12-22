@@ -1,25 +1,11 @@
-
-# coding: utf-8
-
-# In[3]:
-
-
 import requests, wave, json, base64, wave, pygame
 from xml.etree import ElementTree
 from pprint import pprint
-
-
-# In[4]:
-
 
 def getBingCreds():
     credentials = json.load(open('../credentials.json'))
     bingCreds = credentials['cognitiveServices']['bingSpeech']
     return bingCreds
-
-
-# In[5]:
-
 
 def getBingEndpoint():
     return getBingCreds()['endPoint']
@@ -29,10 +15,6 @@ def getTTSEndpoint():
 
 def getBingKey():
     return getBingCreds()['key']
-
-
-# In[6]:
-
 
 def getToken():
     url = getBingEndpoint() + '/issueToken'
@@ -44,10 +26,6 @@ def getToken():
     accessToken = data.decode("UTF-8")
     return(accessToken)
 
-
-# In[7]:
-
-
 def createBody(text):
     body = ElementTree.Element('speak', version='1.0')
     body.set('{http://www.w3.org/XML/1998/namespace}lang', 'en-us')
@@ -58,10 +36,6 @@ def createBody(text):
     voice.text = text
     return(ElementTree.tostring(body))
 
-
-# In[8]:
-
-
 def createTTSHeaders(accessToken):
     headers = {"Content-Type": "application/ssml+xml", 
 			"X-Microsoft-OutputFormat": "riff-16khz-16bit-mono-pcm", 
@@ -70,10 +44,6 @@ def createTTSHeaders(accessToken):
 			"X-Search-ClientID": "1ECFAE91408841A480F00935DC390960", 
 			"User-Agent": "testApp"}
     return(headers)
-
-
-# In[9]:
-
 
 def sendToBing(text):
     accessToken = getToken()
@@ -93,26 +63,6 @@ def sendToBing(text):
         print(req.reason)
         return(False)
 
-
-# In[10]:
-
-
-# def createAudioResponse(audioData):
-#     try:
-#         with wave.open('./response.wav', mode='wb') as audioResponse:
-#             audioResponse.setnchannels(1)
-#             audioResponse.setframerate(16000)
-#             audioResponse.setsampwidth(2)
-#             audioResponse.writeframes(audioData)
-#         return(True)
-#     except:
-#         print("Audio file creation failed")
-#         return(False)
-
-
-# In[11]:
-
-
 def createAudioResponse(audioData):
     with wave.open('./response.wav', mode='wb') as audioResponse:
         audioResponse.setnchannels(1)
@@ -122,10 +72,6 @@ def createAudioResponse(audioData):
         audioResponse.close()
         return(True)        
 
-
-# In[12]:
-
-
 def playAudioResponse():
     pygame.mixer.init(frequency=16000, channels=1, size=-16)
     pygame.mixer.music.load('response.wav')
@@ -134,10 +80,11 @@ def playAudioResponse():
         continue
     pygame.mixer.quit()
     pygame.quit()
-
-
-# In[13]:
-
+    
+def askName():
+    tts("What is your name?")
+    record_to_file('name.wav')
+    print("Obtained name")
 
 def tts(text):
     print(text)
@@ -151,4 +98,3 @@ def tts(text):
         else:
             print("Successfully created audio file")
             playAudioResponse()
-

@@ -10,6 +10,7 @@ from pymongo import MongoClient
 import json, os
 # import pandas as pd
 from pprint import pprint
+from .camera.cam import captureTrainingImages
 
 
 # # Helper Functions

@@ -74,3 +74,5 @@ def captureTrainingImages():
                 pygame.quit()
                 flag = False
                 return
+            
+captureSelfie()
