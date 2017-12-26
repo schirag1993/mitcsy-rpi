@@ -13,9 +13,9 @@ def handleAudio():
     medPattern = re.compile(pattern='med.*')
     errorResponse = "I'm sorry. Something went wrong."
     noneHandler = "My apologies. I do not have that kind of functionality yet."
-    print("Getting TTS data")
+    print("Getting STT data")
     result = stt()
-    print("Got TTS data")
+    print("Got STT data")
     if(type(result) != tuple):
         tts(errorResponse)
     elif(result[0]):

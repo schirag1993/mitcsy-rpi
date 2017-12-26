@@ -80,7 +80,7 @@ def stt():
         req = requests.post(url=url, headers=headers, data=body)
     if(req.status_code != 200):
         print("Something went wrong.")
-        print("Error Code: " + str(req.status_code))
+        print("Response: {0}; Body: {1}".format(req.status_code, req.content))
         print("Reason: " + str(req.reason))
         return(False)
     else:

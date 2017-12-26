@@ -6,14 +6,25 @@ from .bingSpeech.textToSpeech import tts
 from .bingSpeech.speechToText import stt, DiagnoseSTT
 from .audioRecorderAutoStop import record_to_file
 
+# def getDBCreds():
+#     credentials = json.load(open('../credentials.json'))
+#     dbCreds = credentials['database']
+#     return dbCreds
+
 def getDBCreds():
     credentials = json.load(open('../credentials.json'))
-    dbCreds = credentials['database']
+    dbCreds = credentials['database2']
     return dbCreds
 
+# def connectToDB(dbCreds):
+#     cosmosConnString = "mongodb://" + dbCreds['username'] + ":" + dbCreds['password'] + "@" + dbCreds['host'] + ":" + str(dbCreds['port']) + "/?ssl=true&replicaSet=globaldb"
+#     client = MongoClient(cosmosConnString)
+#     return client
+
 def connectToDB(dbCreds):
-    cosmosConnString = "mongodb://" + dbCreds['username'] + ":" + dbCreds['password'] + "@" + dbCreds['host'] + ":" + str(dbCreds['port']) + "/?ssl=true&replicaSet=globaldb"
-    client = MongoClient(cosmosConnString)
+    mongoConnString = "mongodb://" + dbCreds['username'] + ":" + dbCreds['password'] + "@" + dbCreds['host'] + ":" + str(dbCreds['port']) + '/' + dbCreds['dbName']
+#     mongoConnString = "mongodb://{0}:{1}@{2}:{3}/{4}".format(dbCreds['username'], dbCreds['password'], dbCreds['host'], str(dbCreds['port']), dbCreds['dbName'])
+    client = MongoClient(mongoConnString)
     return client
 
 def getClient():
@@ -22,12 +33,12 @@ def getClient():
     return client
 
 def getLiterature(client):
-    db = client["admin"]
+    db = client["mitcsy"]
     literatureCollection = db["literatures"]
     return literatureCollection
 
 def getSymptomList(client):
-    db = client['admin']
+    db = client['mitcsy']
     symptomCollection = db['symptoms']
     symptomListCursor = symptomCollection.find(filter={})
     symptomList = []
@@ -145,3 +156,8 @@ def medicalQuery(luisRes):
         else:
             return(findSymptoms(entities[0]['diseaseName'], dbClient))
         # //////////////^MODIFY MAIN CODE FOR THIS^\\\\\\\\\\\\\\\\
+
+medicalQuery({
+    "intent" : "medical.getDescription",
+    "entities" : [{"diseaseName" : "anthrax"}]
+})

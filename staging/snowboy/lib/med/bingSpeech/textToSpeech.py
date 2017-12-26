@@ -89,6 +89,7 @@ def sendToBing(text):
         print("Something went wrong when sending the data to bing. Status Code:")
         print(req.status_code)
         print(req.reason)
+        print("Response: {0}; Reason: {1}".format(req.status_code, req.json()))
         return(False)
 
 

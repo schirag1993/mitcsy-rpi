@@ -86,6 +86,7 @@ def sendToBing(text):
         print("Successfully converted text to speech")
         return(req.content)
     else:
+        print("Response: {0}; Reason: {1}".format(req.status_code, req.reason))
         print("Something went wrong when sending the data to bing. Status Code:")
         print(req.status_code)
         print(req.reason)

@@ -57,6 +57,7 @@ def createHeaders():
 
 def handleSTTResponse(req):
     result = req.json()
+    print("Response: {0}; Reason: {1}".format(req.status_code, req.json()))
     if(result['RecognitionStatus'] == 'Success'):
         return(True, result['DisplayText'])
     elif(result['RecognitionStatus'] == 'NoMatch'):
