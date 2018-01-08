@@ -54,8 +54,8 @@ def getMailID(name):
         return(False)
     
 def sendMail(data):
-    url = "https://api.mailgun.net/v3/sandbox62818be204d9434b94235950b924fb19.mailgun.org/messages"
-    auth=("api", "key-5de40ff5d813c853ffc344a5d64a04b8")
+    url = "INVALID URL"
+    auth=("api", "INVALID API KEY")
     response = requests.post(url=url, auth=auth, data=data)
     if(response.status_code == 200):
         print("Success!")
