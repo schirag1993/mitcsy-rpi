@@ -2,9 +2,9 @@ from pymongo import MongoClient
 import json, os, re
 # import pandas as pd
 from pprint import pprint
-from bingSpeech.textToSpeech import tts
-from bingSpeech.speechToText import stt, DiagnoseSTT
-from audioRecorderAutoStop import record_to_file
+from .bingSpeech.textToSpeech import tts
+from .bingSpeech.speechToText import stt, DiagnoseSTT
+from .audioRecorderAutoStop import record_to_file
 
 # def getDBCreds():
 #     credentials = json.load(open('../credentials.json'))

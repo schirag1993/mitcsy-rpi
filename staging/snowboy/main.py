@@ -5,6 +5,8 @@ from lib.face.face import faceHandler
 from lib.bingSpeech.textToSpeech import tts
 from lib.bingSpeech.speechToText import stt
 from lib.azureblob.azureblob import sendToAzure
+from lib.ibm.discovery import askDiscovery
+from lib.mail.mail import mailGun
 from pprint import pprint
 import re
 
@@ -37,9 +39,14 @@ def handleAudio():
                 tts(faceHandler(luisResponse))
             elif(luisResponse['intent'] == 'medical.registerPatient'):
                 faceHandler(luisResponse)
+            elif(luisResponse['intent'] == 'medical.discovery'):
+                tts(askDiscovery())
         elif(luisResponse['intent'] == 'None'):
             print("None recognized")
             tts(noneHandler)
+        elif(luisResponse['intent'] == 'Communication.SendEmail'):
+            print("Inside mail intent")
+            mailGun()
         elif(luisResponse['intent'] == 'Camera.CapturePhoto'):
             sendToAzure()
     else:
