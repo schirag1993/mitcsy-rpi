@@ -2,13 +2,44 @@ import requests, json, random
 from .bingSpeech.textToSpeech import playSelfieAudioResponse, tweetAck
 from azure.storage.blob import BlockBlobService
 import random
+import pygame, sys
+import pygame.camera
 from random_words import RandomWords
 from pprint import pprint
+from pygame.locals import *
 from azure.storage.blob import ContentSettings
 
 def captureSelfie():
-    print("Selfie captured!")
-    #Add camera code here
+    width = 1280
+    height = 720
+    dimensions = (width, height)
+    pygame.init()
+    print("Initializing PyGame")
+    pygame.camera.init()
+    flag = True
+    count = 0
+    while(flag):
+        try:
+            cam = pygame.camera.Camera("/dev/video0",dimensions)
+            cam.start()
+            print("Camera started")
+            imageName = 'selfie.jpg'
+            image = cam.get_image()
+            print("Image saved")
+            pygame.image.save(image,imageName)
+            cam.stop()
+            pygame.quit()
+            flag = False
+            return
+        except:
+            print("Camera busy. Stand by.")
+            time.sleep(1)
+            count = count + 1
+            if(count>9):
+                print("You might need to reconnect the camera. My apologies.")
+                pygame.quit()
+                flag = False
+                return
     playSelfieAudioResponse()
 
 def getStorageCredentials():

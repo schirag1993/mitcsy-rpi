@@ -58,7 +58,6 @@ def getIntentAndEntities(text):
     '''
     luisCreds = getLUISCreds()
     result = getPrediction(text,luisCreds)
-    pprint(result)
     intent = getIntent(result)
     pprint(intent)
     entities = getEntities(result)

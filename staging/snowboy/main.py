@@ -40,6 +40,7 @@ def handleAudio():
             elif(luisResponse['intent'] == 'medical.registerPatient'):
                 faceHandler(luisResponse)
             elif(luisResponse['intent'] == 'medical.discovery'):
+                print("Inside medical.discovery handler")
                 tts(askDiscovery())
         elif(luisResponse['intent'] == 'None'):
             print("None recognized")
