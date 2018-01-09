@@ -240,14 +240,16 @@ def addPersonFace(file, personGroupId, personId):
 
 def storePersistedFaceId(persistedFaces, personId):
     client = getClient()
+    print("Inside storePersistedFaceId method")
     patientCollection = getPatients(client)
     returnedDoc = patientCollection.find_one_and_update(filter={"personId":personId}, update={"$set" : {"persistedFaces" : persistedFaces}}, upsert=True, return_document=ReturnDocument.AFTER)
+    print("Modified doc is: ")
     pprint(returnedDoc)
     return(returnedDoc)
 
 def addFaces(personGroupId, personId):
     p = Path('.')
-    pattern = re.compile('training.*jpg')
+    pattern = re.compile('training.*?jpg')
     # res = addPersonFace(p, "hospital_department", "7234cf7b-2b27-43a7-8fd9-36e131e2fb41")
     persistedFaces = []
     for file in p.glob("*.jpg"):

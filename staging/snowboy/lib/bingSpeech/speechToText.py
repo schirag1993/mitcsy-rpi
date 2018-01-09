@@ -60,7 +60,7 @@ def handleSTTResponse(req):
     if(result['RecognitionStatus'] == 'Success'):
         return(True, result['DisplayText'])
     elif(result['RecognitionStatus'] == 'NoMatch'):
-        return(False, "Unable to match words with target langauge. Try again.")
+        return(False, "Unable to match words with target language. Try again.")
     elif(result['RecognitionStatus'] == 'InitialSilenceTimeout'):
         return(False, "Say something, I'm giving up on you.")
     elif(result['RecognitionStatus'] == 'BabbleTimeout'):
