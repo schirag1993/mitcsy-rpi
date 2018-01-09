@@ -1,4 +1,4 @@
-import requests, json, re
+import requests, json, re, time
 from pprint import pprint
 from pathlib import Path
 from pymongo import MongoClient
@@ -254,7 +254,7 @@ def addFaces(personGroupId, personId):
     persistedFaces = []
     for file in p.glob("*.jpg"):
         if(re.search(pattern, str(file))):
-            print("File name: {}".format(str(file)))
+            print("Matched file name: {}".format(str(file)))
             print("Adding face to person ID")
             res = addPersonFace(file=str(file), personGroupId=personGroupId, personId=personId)
             if(res == False):
@@ -263,8 +263,9 @@ def addFaces(personGroupId, personId):
             persistedFaceId = res.json()['persistedFaceId']
             persistedFaces.append(persistedFaceId)
         else:
-            print("Unable to find images")
-            return(False)
+            print("Image file name does not match regex pattern")
+            print("Unmatched file name: {}".format(str(file)))
+        time.sleep(1)
     pprint(storePersistedFaceId(persistedFaces, personId))
     pprint(persistedFaces)
     print("Faces have been stored")
